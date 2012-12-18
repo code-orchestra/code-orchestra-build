@@ -1,0 +1,214 @@
+<project name="ActionScript-MPS-dist" default="default">
+  <property file="ActionScript-MPS-dist.properties" />
+  <import file="${ant.file}/../help-build.xml" />
+
+  <target name="base">
+    <tstamp />
+  <fail unless="codeorchestra.trunk" message="CodeOrchestra trunk path [codeorchestra.trunk] unspecified" />
+  <antcall target="add.libraries0" />
+  </target>
+
+  <target name="clean_before">
+  <delete>
+      <fileset dir="artifacts" includes="*.zip"/>
+      <fileset dir="artifacts" includes="*.gz"/>
+    </delete>
+  </target>
+
+  <target name="mac-only" depends="base"> 
+    <property file="${deploy.dir}/build.number" />
+
+    <antcall target="clean_before" />
+    
+    <antcall target="prepare.flex.sdk" /> 
+
+    <antcall target="macos.dist" />
+
+    <antcall target="clean_after" />
+  </target>  
+  
+  <target name="prepare"> 
+	<mkdir dir="artifacts" />
+  </target>
+
+  <target name="default" depends="base">  
+    <property file="${deploy.dir}/build.number" />
+
+    <antcall target="clean_before" />
+	
+    <antcall target="prepare" />
+    
+    <antcall target="prepare.flex.sdk" /> 
+    <antcall target="copy.mps.index" /> 
+
+    <antcall target="unix.dist" />
+    <antcall target="macos.dist" />
+    <antcall target="windows.dist" />
+
+    <antcall target="clean_after" />
+  </target>
+  
+  <target name="prepare.flex.sdk">
+  <!-- Copy flex_sdk to artifacts -->
+    <unzip src="flex_sdk.zip" dest="${deploy.dir}"/>
+  </target>
+  
+  <target name="copy.mps.index">
+  <!-- Copy MPS.index to artifacts -->
+    <copy file="${codeorchestra.core}/MPS.index" tofile="${deploy.dir}/MPS.index" />
+  </target>
+  
+  <!-- Linux distribution -->
+  <target name="unix.dist">
+    <fail unless="version" message="Property version unspecified." />
+    <fail unless="build.number" message="Property build.number unspecified." />
+    <property name="scripts.folder" value="scripts" />
+    <property name="flex.bin.folder" value="flex_sdk/bin" />    
+    <property name="root.folder" value="${deploy.dir}" />
+    <property name="tar.gz.file" value="CodeOrchestra-${build.number}-linux.tar.gz" />
+    <property name="unix.startup.file" value="${scripts.folder}/codeorchestra.sh" />
+    <property name="unix.rgs.script" value="${scripts.folder}/rgs.sh" />
+    <property name="vmoptions.file" value="${scripts.folder}/codeorchestra.vmoptions" />
+    <property name="swt.file" value="swt-${swt.version}-gtk-linux-x86.zip" />
+    
+    <property name="tar.base.prefix" value="CodeOrchestra-${build.number}" />
+    
+    <delete file="artifacts/${tar.gz.file}" failonerror="false" />
+
+    <fixcrlf file="${unix.startup.file}" eof="remove" eol="unix" />
+    <fixcrlf file="${unix.rgs.script}" eof="remove" eol="unix" />    
+    <fixcrlf file="${vmoptions.file}" eof="asis" eol="unix" />
+
+    <tar destfile="artifacts/${tar.gz.file}" compression="gzip">
+      <tarfileset dir="${deploy.dir}" excludes="**/*.dll, **/*.exe, **/*.bat, **/mxmlc, **/compc, **/swt.jar" prefix="${tar.base.prefix}" />
+
+      <zipfileset file="${deploy.dir}/${flex.bin.folder}/mxmlc" prefix="${tar.base.prefix}/${flex.bin.folder}" filemode="755"/>
+      <zipfileset file="${deploy.dir}/${flex.bin.folder}/compc" prefix="${tar.base.prefix}/${flex.bin.folder}" filemode="755"/>
+
+      <!-- add SWT -->
+      <zipfileset src="tools/swt/swt-${swt.version}-gtk-linux-x86.zip" includes="swt.jar" prefix="${tar.base.prefix}/lib"/>
+      
+      <tarfileset file="${unix.startup.file}" filemode="755" prefix="${tar.base.prefix}" />
+      <tarfileset file="${unix.rgs.script}" filemode="755" prefix="${tar.base.prefix}" />      
+      <tarfileset file="${vmoptions.file}" prefix="${tar.base.prefix}/bin" />
+    </tar>
+  </target>
+
+  <!-- MacOS distribution -->
+  <target name="macos.dist">
+    <fail unless="version" message="Property version unspecified." />
+    <fail unless="build.number" message="Property build.number unspecified." />
+    <property name="scripts.folder" value="scripts" />
+    <property name="flex.bin.folder" value="flex_sdk/bin" />    
+    <property name="info.plist.name" value="Info.plist" />
+    <property name="info.plist" value="${scripts.folder}/${info.plist.name}" />
+    <property name="info.plist.tmp" value="${deploy.dir}/Info.plist" />
+    <property name="icon.file" value="resources/mps.icns" />
+    <property name="java.application.stub" value="resources/mps" />
+    <property name="unix.startup.script" value="${scripts.folder}/codeorchestra.sh" />
+    <property name="unix.rgs.script" value="${scripts.folder}/rgs.sh" />    
+    <property name="zip.file" value="CodeOrchestra-${build.number}-macos.zip" />
+    <property name="root.folder" value="${deploy.dir}" />
+    <property name="root.folder.dest" value="CodeOrchestra.app" />
+    
+    <delete file="artifacts/${zip.file}" failonerror="false" />
+
+    <copy file="${info.plist}" tofile="${info.plist.tmp}" />
+    <replace file="${info.plist.tmp}" token="$version$" value="${version}" />
+    <replace file="${info.plist.tmp}" token="$build$" value="${build.number}" />
+
+    <fixcrlf file="${info.plist.tmp}" eol="unix" eof="remove" />
+    <fixcrlf file="${unix.startup.script}" eol="unix" eof="remove" />
+    <fixcrlf file="${unix.rgs.script}" eol="unix" eof="remove" />    
+    <fixcrlf file="${scripts.folder}/codeorchestra.vmoptions" eol="unix" eof="remove" />
+
+    <zip destfile="artifacts/${zip.file}" duplicate="preserve">
+      <zipfileset dir="${deploy.dir}" prefix="${root.folder.dest}" excludes="**/*.dll, **/*.exe, **/*.bat, **/mxmlc, **/compc, **/swt.jar" />
+
+      <zipfileset file="${deploy.dir}/${flex.bin.folder}/mxmlc" prefix="${root.folder.dest}/${flex.bin.folder}" filemode="755"/>
+      <zipfileset file="${deploy.dir}/${flex.bin.folder}/compc" prefix="${root.folder.dest}/${flex.bin.folder}" filemode="755"/>
+
+      <zipfileset file="${info.plist.tmp}" prefix="${root.folder.dest}/Contents" />
+      <zipfileset file="${icon.file}" prefix="${root.folder.dest}/Contents/Resources" />
+      <zipfileset file="resources/mps.icns" prefix="${root.folder.dest}/Contents/Resources" />
+      <zipfileset file="${java.application.stub}" prefix="${root.folder.dest}/Contents/MacOs" filemode="755" />
+      <zipfileset file="${unix.startup.script}" prefix="${root.folder.dest}" filemode="755" />
+      <zipfileset file="${unix.rgs.script}" prefix="${root.folder.dest}" filemode="755" />      
+      <zipfileset file="${scripts.folder}/codeorchestra.vmoptions" prefix="${root.folder.dest}/bin" />
+      
+      <!-- add SWT -->
+      <zipfileset src="tools/swt/swt-${swt.version}-cocoa-macosx.zip"  includes="swt.jar" prefix="${root.folder.dest}/lib"/>
+      
+    </zip>
+
+    <delete file="${info.plist.tmp}" />
+  </target>
+
+  <!-- Windows distribution -->
+  <target name="windows.dist">
+    <fail unless="version" message="Property version unspecified." />
+    <fail unless="build.number" message="Property build.number unspecified." />
+    <property name="scripts.folder" value="scripts" />
+    <property name="startup.bat.name" value="codeorchestra.bat" />
+    <property name="startup.bat" value="${scripts.folder}/${startup.bat.name}" />
+    <property name="rgs.bat.name" value="rgs.bat" />
+    <property name="rgs.bat" value="${scripts.folder}/${rgs.bat.name}" />
+    <property name="vmoptions.file.name" value="codeorchestra.vmoptions" />
+    <property name="vmoptions.file" value="${scripts.folder}/${vmoptions.file.name}" />
+    <property name="root.folder" value="${deploy.dir}" />
+    <property name="zip.file" value="CodeOrchestra-${build.number}-win.zip" />
+
+    <property name="application.icon" value="${deploy.dir}/application.ico" />
+    <property name="homepage.icon" value="${deploy.dir}/homepage.ico" />
+    <property name="installer.icon" value="${deploy.dir}/installer.ico" />
+    <property name="uninstaller.icon" value="${deploy.dir}/uninstaller.ico" />
+    <property name="flex.win.vmconfig.file" value="${scripts.folder}/WIN-jvm.config" />    
+    
+    <property name="lib.folder" value="${deploy.dir}/lib/" />
+  <!--
+  <property name="jre.zip.path" value="tools/jre.zip" />
+    <property name="jre.unzipped.path" value="${basedir}/${deploy.dir}" />
+  <property name="installer" value="${basedir}/${deploy.dir}/MPS-${build.number}-windows.exe" />
+  --> 
+
+    <delete file="artifacts/${zip.file}" failonerror="false" />
+
+    <fixcrlf file="${startup.bat}" eol="dos" eof="asis" />
+    <fixcrlf file="${rgs.bat}" eol="dos" eof="asis" />
+    <fixcrlf file="${vmoptions.file}" eol="dos" eof="asis" />
+  
+    <copy file="resources/mps.ico" tofile="${application.icon}" />
+    <copy file="resources/homepage.ico" tofile="${homepage.icon}" />
+    
+    <!-- add SWT -->
+    <unzip src="tools/swt/swt-${swt.version}-win32-win32-x86.zip" dest="${lib.folder}">
+      <patternset>
+        <include name="swt.jar"/>
+      </patternset>      
+    </unzip>
+  
+  <!--
+  <unzip src="${jre.zip.path}" dest="${jre.unzipped.path}" />
+  -->
+
+    <copy file="${vmoptions.file}" todir="${root.folder}/bin" />
+    <copy file="${startup.bat}" todir="${root.folder}" />
+    <copy file="${rgs.bat}" todir="${root.folder}" />
+
+    <!-- RF-679 -->    
+    <copy file="${flex.win.vmconfig.file}" tofile="${root.folder}/flex_sdk/bin/jvm.config" />
+    
+    <zip destfile="artifacts/${zip.file}" basedir="${deploy.dir}" />
+
+    <delete file="${application.icon}" />
+    <delete file="${homepage.icon}" />
+    <delete file="${installer.icon}" />
+    <delete file="${uninstaller.icon}" />
+  <!--
+  <delete dir="${jre.unzipped.path}/jre" />
+  -->
+    <delete file="${root.folder}/bin/${vmoptions.file.name}" />
+    <delete file="${root.folder}/${startup.bat.name}" />
+    <delete file="${root.folder}/${rgs.bat.name}" />
+  </target>
+</project>

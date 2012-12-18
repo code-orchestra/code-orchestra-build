@@ -1,0 +1,109 @@
+<project name="help-build" default="add.libraries0">
+  <property name="artifacts.dir.tmp" value="${deploy.dir}" />
+
+  <property name="mps.dir" value="${codeorchestra.trunk}/mps" />
+  <property name="mps.artifacts.zip" value="${mps.dir}/MPS-artifacts.zip" />
+
+  <property name="codeorchestra.artifacts.dir" value="codeorchestra_artifacts" />
+  <property name="codeorchestra.artifacts.zip" value="${codeorchestra.trunk}/artifacts/ActionScript.zip" />
+  <property name="codeorchestra_dist" value="${codeorchestra.artifacts.dir}\ActionScript\Languages\ActionScript" />
+  <property name="base_ext_dist" value="${codeorchestra.artifacts.dir}\ActionScript\Languages\BaseLanguage.ext" />
+
+  <property name="temp_dir" value="temp" />
+  
+  <target name="prepare" >
+  <mkdir dir="temp" />
+  </target>
+
+  <target name="mps.prepare" depends="prepare"> 
+  <mkdir dir="${artifacts.dir.tmp}" />
+    <unzip src="${mps.artifacts.zip}" dest="${artifacts.dir.tmp}" />
+  </target>
+
+  <target name="codeorchestra.prepare">
+  <mkdir dir="${codeorchestra.artifacts.dir}" />
+  <mkdir dir="${codeorchestra.artifacts.dir}\dump" />
+    <unzip src="${codeorchestra.artifacts.zip}" dest="${codeorchestra.artifacts.dir}" />
+  </target>
+
+  <target name="unpack.buildtools.zip0">
+    <fail unless="mps_home" message="Property mps_home unspecified." />
+    <mkdir dir="${mps_home}/build" />
+    <unzip src="lib\MPS-buildTools.zip" dest="${mps_home}/build" />
+  </target>
+
+  <target name="add.libraries0" depends="mps.prepare,codeorchestra.prepare">
+    <property name="mps.jar" value="${artifacts.dir.tmp}/lib/mps.jar" />
+    <property name="extracted.mps.jar" value="${temp_dir}" />
+    
+    <!-- Add as a custom library -->
+    <unzip src="${mps.jar}" dest="${extracted.mps.jar}" />
+      <java classname="jetbrains.mps.library.BuiltInLibrariesIO" dir="${basedir}" fork="true">
+        <classpath>
+          <pathelement location="${mps.jar}" />
+          <pathelement location="${artifacts.dir.tmp}/lib/jdom.jar" />
+          <pathelement location="${artifacts.dir.tmp}/lib/log4j.jar" />
+        </classpath>
+        <arg value="${extracted.mps.jar}" />
+        <arg value="actionscript=ActionScript/" />
+      </java>
+      <jar destfile="${mps.jar}" update="true">
+        <fileset dir="${extracted.mps.jar}">
+          <include name="jetbrains/mps/library/CustomBuiltInLibraries.xml" />
+        </fileset>
+      </jar>
+      <move file="${mps.jar}" todir="${artifacts.dir.tmp}/lib" />
+
+    <!-- Add language jar files -->
+    <property name="as-dir" value="${artifacts.dir.tmp}/ActionScript" />
+    <mkdir dir="${as-dir}" />
+    <copy todir="${as-dir}">
+        <fileset dir="${codeorchestra_dist}">
+      <include name="**/*.jar"/>
+      </fileset>      
+      <fileset dir="${base_ext_dist}">
+      <include name="**/*.jar"/>
+      </fileset>
+      <fileset dir="${codeorchestra.artifacts.dir}\ActionScript\Java Libraries\">
+          <include name="*.jar" />
+      </fileset>
+      <fileset dir="${codeorchestra.artifacts.dir}\ActionScript\Flash Libraries\">
+          <include name="*.jar" />
+      </fileset>
+    </copy>
+
+    <!-- Devkit
+    <copy todir="${artifacts.dir.tmp}/core/devkits">
+        <fileset dir="${codeorchestra.artifacts.dir}\ActionScript">
+      <include name="codeOrchestra.actionScript.devKit.mpsarch.jar"/>
+      </fileset>      
+    </copy>
+    -->
+
+    <antcall target="add.plugins" />
+
+    <antcall target="clean_after_lib_add" />
+  </target>
+
+  <target name="add.plugins">
+    <!-- Add plugins here -->
+
+  <!-- SWC stub generator plugin 
+    <fail unless="swc.plugin.artifacts.dir" message="[swc.plugin.artifacts.dir] expected" />
+  <property name="swc.plugin.deploy.dir" value="${artifacts.dir.tmp}/plugins/SWCStubGenerator" />
+  <mkdir dir="${swc.plugin.deploy.dir}" />
+  <mkdir dir="${swc.plugin.deploy.dir}/lib" />
+  <copy file="${swc.plugin.artifacts.dir}/SWCStubGenerator.jar" todir="${swc.plugin.deploy.dir}/lib" />
+  -->
+  </target>
+
+  <target name="clean_after_lib_add" >
+    <delete dir="temp" />
+    <delete dir="${codeorchestra.artifacts.dir}" />
+  </target>
+
+  <target name="clean_after">
+    <delete dir="${artifacts.dir.tmp}" />
+  </target>
+
+</project>

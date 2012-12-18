@@ -1,0 +1,62 @@
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>CFBundleName</key>
+    <string>CodeOrchestra</string>
+    <key>CFBundleGetInfoString</key>
+    <string>Code Orchestra $version$ (build $build$)</string>
+    <key>CFBundleShortVersionString</key>
+    <string>$version$</string>
+    <key>CFBundleVersion</key>
+    <string>$build$</string>
+    <key>CFBundleExecutable</key>
+    <string>mps</string>
+    <key>CFBundleIconFile</key>
+    <string>mps.icns</string>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>English</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleSignature</key>
+    <string>????</string>
+    <key>CFBundleDocumentTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleTypeExtensions</key>
+        <array>
+          <string>mpr</string>
+        </array>
+        <key>CFBundleTypeIconFile</key>
+        <string>mps.icns</string>
+        <key>CFBundleTypeName</key>
+        <string>Code Orchestra</string>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+      </dict>
+    </array>
+    <key>Java</key>
+    <dict>
+      <key>ClassPath</key>
+      <string>$APP_PACKAGE/lib/branding.jar:$APP_PACKAGE/lib/mpsboot.jar:$APP_PACKAGE/lib/boot.jar:$APP_PACKAGE/lib/bootstrap.jar:$APP_PACKAGE/lib/util.jar:$APP_PACKAGE/lib/jdom.jar:$APP_PACKAGE/lib/log4j.jar:$APP_PACKAGE/lib/extensions.jar:$APP_PACKAGE/lib/trove4j.jar:$APP_PACKAGE/lib/canvas.jar:$APP_PACKAGE/lib/rip.jar:$APP_PACKAGE/lib/MozillaInterfaces-1.8.1.3.jar:$APP_PACKAGE/lib/DJNativeSwing.jar:$APP_PACKAGE/lib/DJNativeSwing-SWT.jar:$APP_PACKAGE/lib/actionScript.jar:$APP_PACKAGE/lib/falcon.jar:$APP_PACKAGE/lib/swt.jar:$APP_PACKAGE/lib/CommonsVFS/commons-vfs2-2.0.jar:$APP_PACKAGE/lib/CommonsVFS/jsch-0.1.48.jar:$APP_PACKAGE/lib/ApacheSSHD/bcprov-jdk15-140.jar:$APP_PACKAGE/lib/ApacheSSHD/mina-core-2.0.2.jar:$APP_PACKAGE/lib/ApacheSSHD/slf4j-api-1.4.3.jar:$APP_PACKAGE/lib/ApacheSSHD/slf4j-simple-1.4.3.jar:$APP_PACKAGE/lib/ApacheSSHD/sshd-core-0.6.0.jar:$APP_PACKAGE/lib/ApacheSSHD/sshd-pam-0.6.0.jar</string>
+      <key>JVMVersion</key>
+      <string>1.6+</string>
+      <key>MainClass</key>
+      <string>jetbrains.mps.Launcher</string>
+      <key>Properties</key>
+      <dict>
+        <key>apple.laf.useScreenMenuBar</key>
+        <string>true</string>
+        <key>com.apple.mrj.application.live-resize</key>
+        <string>false</string>
+        <key>file.encoding</key>
+        <string>windows-1251</string>        
+      </dict>
+      <key>VMOptions</key>
+      <string>-client -Xss1024k -ea -d32 -Xmx1200m -XX:MaxPermSize=256m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -agentpath:libyjpagent.jnilib -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -DdataIndexerMode=load</string>
+      <key>WorkingDirectory</key>
+      <string>$APP_PACKAGE/bin</string>
+    </dict>
+  </dict>
+</plist>

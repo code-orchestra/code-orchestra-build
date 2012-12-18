@@ -1,0 +1,8 @@
+-client
+-Xss1024k
+-ea
+-Xmx1000m
+-XX:MaxPermSize=256m
+-XX:+HeapDumpOnOutOfMemoryError
+-Dfile.encoding=UTF-8
+-Dsun.java2d.pmoffscreen=false

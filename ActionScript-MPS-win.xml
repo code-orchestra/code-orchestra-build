@@ -1,0 +1,126 @@
+<project name="ActionScript-MPS-win" default="windows.dist">
+  
+	<property name="version" value="2.0 Beta" />
+
+    <target name="windows.dist">		
+		<tstamp/>
+		
+		<property name="deploy.dir" value="build" />	
+		
+		<fail unless="version" message="Property version unspecified." />
+		
+		<!-- Prepare win artifact path -->
+		<path id="codeorchestra.win.artifact.ref">
+		  <fileset dir="artifacts" casesensitive="no">
+	    	 <include name="CodeOrchestra-*-win.zip"/>
+	      </fileset>
+		</path>
+		<property name="codeorchestra.win.artifact" refid="codeorchestra.win.artifact.ref"/>
+
+		<!-- Startup batch -->
+		<property name="scripts.folder" value="${deploy.dir}" />
+		<property name="startup.bat.name" value="codeorchestra.bat" />
+		<property name="startup.bat" value="${scripts.folder}/${startup.bat.name}" />
+
+		<!-- VM options -->
+		<property name="vmoptions.file.name" value="mps.vmoptions" />
+		<property name="vmoptions.file" value="${scripts.folder}/bin/${vmoptions.file.name}" />
+		
+		<!-- Root folder -->
+		<property name="root.folder" value="${deploy.dir}" />
+
+		<!-- NSIS script -->
+		<property name="nsis.script.name" value="installer.nsi" />
+		<property name="nsis.script.path" value="${nsis.script.name}" />
+		<property name="nsis.script.path.tmp" value="${deploy.dir}/installation.script${DSTAMP}.nsi" />
+
+		<!-- Icons -->
+		<property name="application.icon" value="${deploy.dir}/application.ico" />
+		<property name="homepage.icon" value="${deploy.dir}/homepage.ico" />
+		<property name="installer.icon" value="${deploy.dir}/installer.ico" />
+		<property name="uninstaller.icon" value="${deploy.dir}/uninstaller.ico" />
+		
+		<!-- License -->
+		<property name="license.path" value="${deploy.dir}/license.txt" />
+		<property name="license.src.path" value="${deploy.dir}/license/codeorchestra_license.txt" />
+	
+		<!-- JRE -->
+		<property name="jre.zip.path" value="tools/jre.zip" />
+		<property name="jre.unzipped.path" value="${deploy.dir}" />
+		
+		<!-- Installer -->
+		<property name="installer" value="${basedir}/${deploy.dir}/CodeOrchestra-${build.number}-windows.exe" />
+
+		<!-- Make installer -->
+
+		<!-- Unzip artifact -->
+		<mkdir dir="${deploy.dir}" />
+		<unzip src="${codeorchestra.win.artifact}" dest="${deploy.dir}" />
+
+		<!-- Retrieve the build number -->
+		<property file="${deploy.dir}/build.number" />
+		
+		<!-- Fix unix files -->
+		<fixcrlf file="${startup.bat}" eol="dos" eof="asis" />
+		<fixcrlf file="${vmoptions.file}" eol="dos" eof="asis" />
+		
+		<!-- Copy stuff -->
+		<copy file="${nsis.script.path}" tofile="${nsis.script.path.tmp}" />
+		<copy file="scripts/codeorchestra.bat" tofile="${deploy.dir}/codeorchestra.bat" />
+		<copy file="scripts/rgs.bat" tofile="${deploy.dir}/rgs.bat" />
+		<copy file="resources/mps.ico" tofile="${application.icon}" />		
+		<copy file="resources/homepage.ico" tofile="${homepage.icon}" />
+		<copy file="resources/mps.inst.ico" tofile="${installer.icon}" />
+		<copy file="resources/mps.uninst.ico" tofile="${uninstaller.icon}" />
+		<copy file="${license.src.path}" tofile="${license.path}" />		
+		<unzip src="${jre.zip.path}" dest="${jre.unzipped.path}/jre" />
+
+		<!-- Rename mps.bat -> rase.bat --> 
+		<!-- <move file="${deploy.dir}/mps.bat" tofile="${deploy.dir}/rase.bat"/> --> 	
+		
+		<!-- Why copy VMOPTIONS.EXE?
+		<copy file="${vmoptions.file}" tofile="${root.folder}/bin/${vmoptions.exe.file.name}" />
+		-->
+		
+		<!-- Generate NSIS script -->
+		<java classpath="lib/jetbrains.mps.build.distrib.mpsarch.jar" classname="jetbrains.mps.build.GenerateNSI" fork="true" dir="${deploy.dir}" failonerror="true">
+		  <arg file="${nsis.script.path.tmp}/../install.nsh" />
+		  <arg file="${nsis.script.path.tmp}/../uninstall.nsh" />
+		  <arg file="${root.folder}" />
+		  <arg file="${startup.bat}" />
+		  <arg file="${application.icon}" />
+		  <arg file="${jre.unzipped.path}/jre" />
+		  <arg file="${homepage.icon}" />
+		</java>
+		<replace file="${nsis.script.path.tmp}" token="$version$" value="${version}" />
+		<replace file="${nsis.script.path.tmp}" token="$build$" value="${build.number}" />
+
+		<!-- Exec NSIS -->
+		<exec executable="tools/nsis/makensis.exe" osfamily="windows" failonerror="true">
+		  <arg file="${nsis.script.path.tmp}" />
+		</exec>
+		
+		<!-- AE: No sertificate //TODO: find out wth is that
+		<exec executable="${mps_home}/build/sign/SignCode.exe" osfamily="windows" failonerror="true" dir="${scripts.folder}">
+		  <arg line="/spc ${mps_home}/build/sign/MASertificate.spc /v ${mps_home}/build/sign/test.pvk /t http://timestamp.verisign.com/scripts/timstamp.dll ${installer}" />
+		</exec>
+		-->
+
+		<delete file="${nsis.script.path.tmp}" />
+		<delete file="${application.icon}" />
+		<delete file="${homepage.icon}" />
+		<delete file="${installer.icon}" />
+		<delete file="${uninstaller.icon}" />
+		<delete file="${license.path}" />
+		<delete dir="${jre.unzipped.path}/jre" />
+		<delete file="${nsis.script.path.tmp}/../install.nsh" />
+		<delete file="${nsis.script.path.tmp}/../uninstall.nsh" />
+		<delete file="${root.folder}/bin/${vmoptions.exe.file.name}" />
+
+		<copy file="${deploy.dir}/Code Orchestra 2.0 Beta-win.exe" tofile="artifacts/CodeOrchestra-${build.number}-win.exe" />
+
+		<delete dir="build" />
+		<delete file="${codeorchestra.win.artifact}" />
+  </target>  
+  
+</project>
