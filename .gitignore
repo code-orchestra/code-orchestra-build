@@ -1,0 +1,4 @@
+.DS_Store
+artifacts_tmp/
+artifacts/
+flex_sdk.zip
