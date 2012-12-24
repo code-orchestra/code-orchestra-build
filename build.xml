@@ -1,0 +1,279 @@
+<project name="ActionScript-MPS-dist" default="default">
+  <property file="ActionScript-MPS-dist.properties" />
+  <import file="${ant.file}/../help-build.xml" />
+
+  <target name="base">
+    <tstamp />
+  <fail unless="codeorchestra.trunk" message="CodeOrchestra trunk path [codeorchestra.trunk] unspecified" />
+  <antcall target="add.libraries0" />
+  </target>
+
+  <target name="prepare"> 
+	<mkdir dir="artifacts" />
+  </target>
+
+  <target name="default" depends="base">  
+    <property file="${deploy.dir}/build.number" />
+	
+    <fail unless="version" message="Property version unspecified." />
+    <fail unless="build.number" message="Property build.number unspecified." />
+	
+	<!-- set properties -->
+	
+    <property name="scripts.folder" value="scripts" />
+    <property name="unix.startup.script" value="${scripts.folder}/codeorchestra.sh" />
+    <property name="unix.rgs.script" value="${scripts.folder}/rgs.sh" />
+    <property name="startup.bat.name" value="codeorchestra.bat" />
+    <property name="startup.bat" value="${scripts.folder}/${startup.bat.name}" />
+    <property name="rgs.bat.name" value="rgs.bat" />
+    <property name="rgs.bat" value="${scripts.folder}/${rgs.bat.name}" />
+	
+    <property name="macos.root.directory.name" value="CodeOrchestra.app" />
+    <property name="linux.tar.base.prefix" value="CodeOrchestra-${build.number}" />
+	
+    <property name="linux.distrib" value="CodeOrchestra-${build.number}-FlexSDK-linux.tar.gz" />
+    <property name="linux.lite.distrib" value="CodeOrchestra-${build.number}-linux.tar.gz" />
+    <property name="macos.distrib" value="CodeOrchestra-${build.number}-FlexSDK-macos.zip" />
+    <property name="macos.lite.distrib" value="CodeOrchestra-${build.number}-macos.zip" />
+    <property name="win.distrib" value="CodeOrchestra-${build.number}-FlexSDK-win.exe" />
+    <property name="win.lite.distrib" value="CodeOrchestra-${build.number}-win.exe" />
+	
+    <property name="vmoptions.file.name" value="codeorchestra.vmoptions" />
+    <property name="vmoptions.file" value="${scripts.folder}/${vmoptions.file.name}" />
+	
+    <property name="info.plist.name" value="Info.plist" />
+    <property name="info.plist" value="${scripts.folder}/${info.plist.name}" />
+    <property name="info.plist.tmp" value="${deploy.dir}/Info.plist" />
+
+    <property name="macos.java.application.stub" value="resources/mps" />
+	
+    <property name="macos.icon.file" value="resources/mps.icns" />
+    <property name="win.application.icon" value="${deploy.dir}/application.ico" />
+    <property name="win.homepage.icon" value="${deploy.dir}/homepage.ico" />
+    <property name="win.installer.icon" value="${deploy.dir}/installer.ico" />
+    <property name="win.uninstaller.icon" value="${deploy.dir}/uninstaller.ico" />
+		
+	<property name="nsis.script.path" value="installer.nsi" />
+	<property name="nsis.script.path.tmp" value="${deploy.dir}/installation.script${DSTAMP}.nsi" />
+
+    <property name="win.lib.folder" value="${deploy.dir}/lib/" />
+    
+	<property name="flex.bin.folder" value="flex_sdk/bin" />   
+    <property name="flex.win.vmconfig.file" value="${scripts.folder}/WIN-jvm.config" />    	
+
+
+	
+    <antcall target="prepare" />
+    <antcall target="copy.mps.index" /> 
+	
+    <antcall target="unix.lite.dist" />
+    <antcall target="macos.lite.dist" />
+    <antcall target="windows.lite.dist" />
+    
+    <antcall target="prepare.flex.sdk" /> 
+
+    <antcall target="unix.dist" />
+    <antcall target="macos.dist" />
+    <antcall target="windows.dist" />
+
+    <antcall target="clean_after" />
+  </target>
+  
+  <target name="prepare.flex.sdk">
+  <!-- Copy flex_sdk to artifacts -->
+    <unzip src="flex_sdk.zip" dest="${deploy.dir}"/>
+  </target>
+  
+  <target name="copy.mps.index">
+  <!-- Copy MPS.index to artifacts -->
+    <copy file="${codeorchestra.core}/MPS.index" tofile="${deploy.dir}/MPS.index" />
+  </target>
+
+  <!-- Linux distribution -->
+  
+  <target name="pre.unix.dist">
+    <fixcrlf file="${unix.startup.script}" eof="remove" eol="unix" />
+    <fixcrlf file="${unix.rgs.script}" eof="remove" eol="unix" />    
+    <fixcrlf file="${vmoptions.file}" eof="asis" eol="unix" />
+  </target>
+  
+  <target name="unix.dist">
+	<antcall target="pre.unix.dist" />
+
+    <delete file="artifacts/${linux.distrib}" failonerror="false" />
+    <tar destfile="artifacts/${linux.distrib}" compression="gzip">
+      <tarfileset dir="${deploy.dir}" excludes="**/*.dll, **/*.exe, **/*.bat, **/mxmlc, **/compc, **/swt.jar" prefix="${linux.tar.base.prefix}" />
+
+      <zipfileset file="${deploy.dir}/${flex.bin.folder}/mxmlc" prefix="${linux.tar.base.prefix}/${flex.bin.folder}" filemode="755"/>
+      <zipfileset file="${deploy.dir}/${flex.bin.folder}/compc" prefix="${linux.tar.base.prefix}/${flex.bin.folder}" filemode="755"/>
+
+      <!-- add SWT -->
+      <zipfileset src="tools/swt/swt-${swt.version}-gtk-linux-x86.zip" includes="swt.jar" prefix="${linux.tar.base.prefix}/lib"/>
+      
+      <tarfileset file="${unix.startup.script}" filemode="755" prefix="${linux.tar.base.prefix}" />
+      <tarfileset file="${unix.rgs.script}" filemode="755" prefix="${linux.tar.base.prefix}" />      
+      <tarfileset file="${vmoptions.file}" prefix="${linux.tar.base.prefix}/bin" />
+    </tar>
+  </target>
+  
+  <target name="unix.lite.dist">
+	<antcall target="pre.unix.dist" />
+
+    <delete file="artifacts/${linux.lite.distrib}" failonerror="false" />
+    <tar destfile="artifacts/${linux.lite.distrib}" compression="gzip">
+      <tarfileset dir="${deploy.dir}" excludes="**/*.dll, **/*.exe, **/*.bat, **/mxmlc, **/compc, **/swt.jar" prefix="${linux.tar.base.prefix}" />
+
+      <!-- add SWT -->
+      <zipfileset src="tools/swt/swt-${swt.version}-gtk-linux-x86.zip" includes="swt.jar" prefix="${linux.tar.base.prefix}/lib"/>
+      
+      <tarfileset file="${unix.startup.script}" filemode="755" prefix="${linux.tar.base.prefix}" />
+      <tarfileset file="${unix.rgs.script}" filemode="755" prefix="${linux.tar.base.prefix}" />      
+      <tarfileset file="${vmoptions.file}" prefix="${linux.tar.base.prefix}/bin" />
+    </tar>
+  </target>
+
+  <!-- MacOS distribution -->
+
+  <target name="pre.macos.dist">
+    <copy file="${info.plist}" tofile="${info.plist.tmp}" />
+    <replace file="${info.plist.tmp}" token="$version$" value="${version}" />
+    <replace file="${info.plist.tmp}" token="$build$" value="${build.number}" />
+    <fixcrlf file="${info.plist.tmp}" eol="unix" eof="remove" />
+    <fixcrlf file="${unix.startup.script}" eol="unix" eof="remove" />
+    <fixcrlf file="${unix.rgs.script}" eol="unix" eof="remove" />    
+    <fixcrlf file="${scripts.folder}/codeorchestra.vmoptions" eol="unix" eof="remove" />
+  </target>
+  
+  <target name="macos.dist">
+	<antcall target="pre.macos.dist" />
+  
+    <delete file="artifacts/${macos.distrib}" failonerror="false" />
+    <zip destfile="artifacts/${macos.distrib}" duplicate="preserve">
+      <zipfileset dir="${deploy.dir}" prefix="${macos.root.directory.name}" excludes="**/*.dll, **/*.exe, **/*.bat, **/mxmlc, **/compc, **/swt.jar" />
+
+      <zipfileset file="${deploy.dir}/${flex.bin.folder}/mxmlc" prefix="${macos.root.directory.name}/${flex.bin.folder}" filemode="755"/>
+      <zipfileset file="${deploy.dir}/${flex.bin.folder}/compc" prefix="${macos.root.directory.name}/${flex.bin.folder}" filemode="755"/>
+
+      <zipfileset file="${info.plist.tmp}" prefix="${macos.root.directory.name}/Contents" />
+      <zipfileset file="${macos.icon.file}" prefix="${macos.root.directory.name}/Contents/Resources" />
+      <zipfileset file="${macos.java.application.stub}" prefix="${macos.root.directory.name}/Contents/MacOs" filemode="755" />
+      <zipfileset file="${unix.startup.script}" prefix="${macos.root.directory.name}" filemode="755" />
+      <zipfileset file="${unix.rgs.script}" prefix="${macos.root.directory.name}" filemode="755" />      
+      <zipfileset file="${scripts.folder}/codeorchestra.vmoptions" prefix="${macos.root.directory.name}/bin" />
+      
+      <!-- add SWT -->
+      <zipfileset src="tools/swt/swt-${swt.version}-cocoa-macosx.zip"  includes="swt.jar" prefix="${macos.root.directory.name}/lib"/>
+      
+    </zip>
+    <delete file="${info.plist.tmp}" />
+  </target>
+  
+  <target name="macos.lite.dist">
+	<antcall target="pre.macos.dist" />
+  
+    <delete file="artifacts/${macos.lite.distrib}" failonerror="false" />
+    <zip destfile="artifacts/${macos.lite.distrib}" duplicate="preserve">
+      <zipfileset dir="${deploy.dir}" prefix="${macos.root.directory.name}" excludes="**/*.dll, **/*.exe, **/*.bat, **/mxmlc, **/compc, **/swt.jar" />
+
+      <zipfileset file="${info.plist.tmp}" prefix="${macos.root.directory.name}/Contents" />
+      <zipfileset file="${macos.icon.file}" prefix="${macos.root.directory.name}/Contents/Resources" />
+      <zipfileset file="${macos.java.application.stub}" prefix="${macos.root.directory.name}/Contents/MacOs" filemode="755" />
+      <zipfileset file="${unix.startup.script}" prefix="${macos.root.directory.name}" filemode="755" />
+      <zipfileset file="${unix.rgs.script}" prefix="${macos.root.directory.name}" filemode="755" />      
+      <zipfileset file="${scripts.folder}/codeorchestra.vmoptions" prefix="${macos.root.directory.name}/bin" />
+      
+      <!-- add SWT -->
+      <zipfileset src="tools/swt/swt-${swt.version}-cocoa-macosx.zip"  includes="swt.jar" prefix="${macos.root.directory.name}/lib"/>
+      
+    </zip>
+    <delete file="${info.plist.tmp}" />
+  </target>
+  
+  <!-- Windows distribution -->
+  
+  <target name="pre.win.dist">
+    <fixcrlf file="${startup.bat}" eol="dos" eof="asis" />
+    <fixcrlf file="${rgs.bat}" eol="dos" eof="asis" />
+    <fixcrlf file="${vmoptions.file}" eol="dos" eof="asis" />
+    <copy file="resources/mps.ico" tofile="${win.application.icon}" />
+    <copy file="resources/homepage.ico" tofile="${win.homepage.icon}" />
+	<copy file="resources/mps.inst.ico" tofile="${win.installer.icon}" />
+	<copy file="resources/mps.uninst.ico" tofile="${win.uninstaller.icon}" />
+	<copy file="${startup.bat}" todir="${deploy.dir}" />
+	<copy file="${rgs.bat}" todir="${deploy.dir}" />
+    <copy file="${vmoptions.file}" todir="${deploy.dir}/bin" />
+	<copy file="${deploy.dir}/license/codeorchestra_license.txt" tofile="${deploy.dir}/license.txt" />	
+	<copy file="${nsis.script.path}" tofile="${nsis.script.path.tmp}" />
+	<unzip src="tools/jre.zip" dest="${deploy.dir}/jre" />
+    <!-- add SWT -->
+    <unzip src="tools/swt/swt-${swt.version}-win32-win32-x86.zip" dest="${win.lib.folder}">
+      <patternset>
+        <include name="swt.jar"/>
+      </patternset>      
+    </unzip>
+  </target>
+  
+  <target name="post.win.dist">
+	<delete file="${win.application.icon}" />
+	<delete file="${win.homepage.icon}" />
+	<delete file="${win.installer.icon}" />
+	<delete file="${win.uninstaller.icon}" />
+	<delete file="${deploy.dir}/${startup.bat.name}" />
+	<delete file="${deploy.dir}/${rgs.bat.name}" />
+	<delete file="${deploy.dir}/bin/${vmoptions.file.name}" />
+	<delete file="${deploy.dir}/license.txt" />
+	<delete dir="${deploy.dir}/jre" />
+	<delete file="${win.lib.folder}/swt.jar" />
+	<delete file="${nsis.script.path.tmp}" />
+	<delete file="${deploy.dir}/Code Orchestra 2.0 Beta-win.exe" />
+	<delete file="${deploy.dir}/install.nsh" />
+	<delete file="${deploy.dir}/uninstall.nsh" />
+  </target>
+
+  <target name="windows.common.dist">
+  
+	<!-- Generate NSIS script -->
+	<java classpath="lib/jetbrains.mps.build.distrib.mpsarch.jar" classname="jetbrains.mps.build.GenerateNSI" fork="true" dir="${deploy.dir}" failonerror="true">
+	  <arg file="${deploy.dir}/install.nsh" />
+	  <arg file="${deploy.dir}/uninstall.nsh" />
+	  <arg file="${deploy.dir}" />
+	  <arg file="${startup.bat}" />
+	  <arg file="${win.application.icon}" />
+	  <arg file="${deploy.dir}/jre" />
+	  <arg file="${win.homepage.icon}" />
+	</java>
+	<replace file="${nsis.script.path.tmp}" token="$version$" value="${version}" />
+	<replace file="${nsis.script.path.tmp}" token="$build$" value="${build.number}" />
+
+	<!-- Exec NSIS -->
+	<exec executable="tools/nsis/makensis.exe" osfamily="windows" failonerror="true">
+	  <arg file="${nsis.script.path.tmp}" />
+	</exec>
+	
+  </target>
+
+  <target name="windows.dist">
+	<antcall target="pre.win.dist" />
+	
+    <!-- RF-679 -->    
+    <copy file="${flex.win.vmconfig.file}" tofile="${deploy.dir}/flex_sdk/bin/jvm.config" />
+	
+    <delete file="artifacts/${win.distrib}" failonerror="false" />
+	<antcall target="windows.common.dist" />
+	
+	<copy file="${deploy.dir}/Code Orchestra 2.0 Beta-win.exe" tofile="artifacts/${win.distrib}" />
+	
+	<antcall target="post.win.dist" />
+  </target>
+  
+  <target name="windows.lite.dist">
+	<antcall target="pre.win.dist" />
+	
+    <delete file="artifacts/${win.lite.distrib}" failonerror="false" />
+	<antcall target="windows.common.dist" />
+	
+	<copy file="${deploy.dir}/Code Orchestra 2.0 Beta-win.exe" tofile="artifacts/${win.lite.distrib}" />
+	
+	<antcall target="post.win.dist" />
+  </target>
+</project>
