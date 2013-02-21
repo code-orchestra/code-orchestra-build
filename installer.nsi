@@ -1,5 +1,5 @@
 #************************************ Definitions *********************************************************#
-!define PRODUCT_NAME "Code Orchestra 2.0 Beta"
+!define PRODUCT_NAME "Code Orchestra 2.0 RC1"
 !define PRODUCT_VERSION "$build$"
 !define PRODUCT_MAJOR_VERSION "$version$"
 !define PRODUCT_PUBLISHER "Code Orchestra"

@@ -225,7 +225,7 @@
 	<delete dir="${deploy.dir}/jre" />
 	<delete file="${win.lib.folder}/swt.jar" />
 	<delete file="${nsis.script.path.tmp}" />
-	<delete file="${deploy.dir}/Code Orchestra 2.0 Beta-win.exe" />
+	<delete file="${deploy.dir}/Code Orchestra 2.0 RC1-win.exe" />
 	<delete file="${deploy.dir}/install.nsh" />
 	<delete file="${deploy.dir}/uninstall.nsh" />
   </target>
@@ -261,7 +261,7 @@
     <delete file="artifacts/${win.distrib}" failonerror="false" />
 	<antcall target="windows.common.dist" />
 	
-	<copy file="${deploy.dir}/Code Orchestra 2.0 Beta-win.exe" tofile="artifacts/${win.distrib}" />
+	<copy file="${deploy.dir}/Code Orchestra 2.0 RC1-win.exe" tofile="artifacts/${win.distrib}" />
 	
 	<antcall target="post.win.dist" />
   </target>
@@ -272,7 +272,7 @@
     <delete file="artifacts/${win.lite.distrib}" failonerror="false" />
 	<antcall target="windows.common.dist" />
 	
-	<copy file="${deploy.dir}/Code Orchestra 2.0 Beta-win.exe" tofile="artifacts/${win.lite.distrib}" />
+	<copy file="${deploy.dir}/Code Orchestra 2.0 RC1-win.exe" tofile="artifacts/${win.lite.distrib}" />
 	
 	<antcall target="post.win.dist" />
   </target>
