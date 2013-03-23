@@ -70,6 +70,7 @@
     <property name="unix.rgs.script" value="${scripts.folder}/rgs.sh" />
     <property name="vmoptions.file" value="${scripts.folder}/codeorchestra.vmoptions" />
     <property name="swt.file" value="swt-${swt.version}-gtk-linux-x86.zip" />
+    <property name="crossdomain.file" value="${scripts.folder}/crossdomain.xml" />
     
     <property name="tar.base.prefix" value="CodeOrchestra-${build.number}" />
     
@@ -91,6 +92,7 @@
       <tarfileset file="${unix.startup.file}" filemode="755" prefix="${tar.base.prefix}" />
       <tarfileset file="${unix.rgs.script}" filemode="755" prefix="${tar.base.prefix}" />      
       <tarfileset file="${vmoptions.file}" prefix="${tar.base.prefix}/bin" />
+      <tarfileset file="${crossdomain.file}" prefix="${tar.base.prefix}" />      
     </tar>
   </target>
 
@@ -110,6 +112,7 @@
     <property name="zip.file" value="CodeOrchestra-${build.number}-macos.zip" />
     <property name="root.folder" value="${deploy.dir}" />
     <property name="root.folder.dest" value="CodeOrchestra.app" />
+    <property name="crossdomain.file" value="${scripts.folder}/crossdomain.xml" />
     
     <delete file="artifacts/${zip.file}" failonerror="false" />
 
@@ -135,6 +138,7 @@
       <zipfileset file="${unix.startup.script}" prefix="${root.folder.dest}" filemode="755" />
       <zipfileset file="${unix.rgs.script}" prefix="${root.folder.dest}" filemode="755" />      
       <zipfileset file="${scripts.folder}/codeorchestra.vmoptions" prefix="${root.folder.dest}/bin" />
+      <zipfileset file="${crossdomain.file}" prefix="${root.folder.dest}" />      
       
       <!-- add SWT -->
       <zipfileset src="tools/swt/swt-${swt.version}-cocoa-macosx.zip"  includes="swt.jar" prefix="${root.folder.dest}/lib"/>
@@ -157,6 +161,7 @@
     <property name="vmoptions.file" value="${scripts.folder}/${vmoptions.file.name}" />
     <property name="root.folder" value="${deploy.dir}" />
     <property name="zip.file" value="CodeOrchestra-${build.number}-win.zip" />
+    <property name="crossdomain.file" value="${scripts.folder}/crossdomain.xml" />    
 
     <property name="application.icon" value="${deploy.dir}/application.ico" />
     <property name="homepage.icon" value="${deploy.dir}/homepage.ico" />
@@ -194,6 +199,7 @@
     <copy file="${vmoptions.file}" todir="${root.folder}/bin" />
     <copy file="${startup.bat}" todir="${root.folder}" />
     <copy file="${rgs.bat}" todir="${root.folder}" />
+    <copy file="${crossdomain.file}" todir="${root.folder}" />    
 
     <!-- RF-679 -->    
     <copy file="${flex.win.vmconfig.file}" tofile="${root.folder}/flex_sdk/bin/jvm.config" />
