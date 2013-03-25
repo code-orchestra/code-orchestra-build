@@ -55,9 +55,9 @@ set CLASSPATH=%CLASSPATH%;"%PROJECT_HOME%lib\ApacheSSHD\slf4j-simple-1.4.3.jar"
 set CLASSPATH=%CLASSPATH%;"%PROJECT_HOME%lib\ApacheSSHD\sshd-core-0.6.0.jar"
 set CLASSPATH=%CLASSPATH%;"%PROJECT_HOME%lib\ApacheSSHD\sshd-pam-0.6.0.jar"
 
-set CLASSPATH=%CLASSPATH%;"%PROJECT_HOME%lib\tjws\servlet-2-3.jar"
-set CLASSPATH=%CLASSPATH%;"%PROJECT_HOME%lib\tjws\war.jar"
-set CLASSPATH=%CLASSPATH%;"%PROJECT_HOME%lib\tjws\webserver.jar"
+set CLASSPATH=%CLASSPATH%;"%PROJECT_HOME%lib\jetty\jetty-6.1.26.jar"
+set CLASSPATH=%CLASSPATH%;"%PROJECT_HOME%lib\jetty\jetty-util-6.1.26.jar"
+set CLASSPATH=%CLASSPATH%;"%PROJECT_HOME%lib\jetty\servlet-api-2.5.jar"
 
 pushd bin
 start "" %JAVA% %JVM_ARGS% %ADDITIONAL_JVM_ARGS% -classpath %CLASSPATH% %MAIN_CLASS% %*
