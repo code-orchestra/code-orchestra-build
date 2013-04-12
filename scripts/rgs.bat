@@ -52,6 +52,9 @@ set CLASSPATH=%CLASSPATH%;"%PROJECT_HOME%ActionScript\XStream.mpsarch.jar"
 set CLASSPATH=%CLASSPATH%;"%PROJECT_HOME%lib\commons-io-2.0.1.jar"
 set CLASSPATH=%CLASSPATH%;"%PROJECT_HOME%lib\commons-lang-2.4.jar"
 
+set CLASSPATH=%CLASSPATH%;"%PROJECT_HOME%lib\testng-6.8.1.jar"
+set CLASSPATH=%CLASSPATH%;"%PROJECT_HOME%lib\eawtstub.jar"
+
 pushd bin
 start "" %JAVA% %JVM_ARGS% %ADDITIONAL_JVM_ARGS% -classpath %CLASSPATH% %MAIN_CLASS% %*
 popd

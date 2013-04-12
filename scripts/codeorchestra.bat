@@ -59,6 +59,9 @@ set CLASSPATH=%CLASSPATH%;"%PROJECT_HOME%lib\jetty\jetty-6.1.26.jar"
 set CLASSPATH=%CLASSPATH%;"%PROJECT_HOME%lib\jetty\jetty-util-6.1.26.jar"
 set CLASSPATH=%CLASSPATH%;"%PROJECT_HOME%lib\jetty\servlet-api-2.5.jar"
 
+set CLASSPATH=%CLASSPATH%;"%PROJECT_HOME%lib\testng-6.8.1.jar"
+set CLASSPATH=%CLASSPATH%;"%PROJECT_HOME%lib\eawtstub.jar"
+
 pushd bin
 start "" %JAVA% %JVM_ARGS% %ADDITIONAL_JVM_ARGS% -classpath %CLASSPATH% %MAIN_CLASS% %*
 popd
