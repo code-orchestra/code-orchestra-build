@@ -1,6 +1,6 @@
 <project name="ActionScript-MPS-win" default="windows.dist">
   
-	<property name="version" value="2.0 RC1" />
+	<property name="version" value="2.0 Beta" />
 
     <target name="windows.dist">		
 		<tstamp/>
@@ -117,7 +117,7 @@
 		<delete file="${nsis.script.path.tmp}/../uninstall.nsh" />
 		<delete file="${root.folder}/bin/${vmoptions.exe.file.name}" />
 
-		<copy file="${deploy.dir}/Code Orchestra 2.0 RC1-win.exe" tofile="artifacts/CodeOrchestra-${build.number}-win.exe" />
+		<copy file="${deploy.dir}/Code Orchestra ${version}-win.exe" tofile="artifacts/CodeOrchestra-${build.number}-win.exe" />
 
 		<delete dir="build" />
 		<delete file="${codeorchestra.win.artifact}" />
